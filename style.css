@@ -5,3 +5,15 @@ body {
 h1 {
     text-align: center;
 }
+
+#array-container {
+    display: flex;
+    align-items: flex-end;
+    height: 400px;
+    gap: 4px;
+}
+
+.bar {
+    flex: 1;
+    background-color: steelblue;
+}

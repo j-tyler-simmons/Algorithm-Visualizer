@@ -1,3 +1,5 @@
+import { bubbleSort } from "./algorithms/sorting/bubbleSort.js"
+
 const values = [];
 const min = 10;
 const max = 100;
@@ -48,6 +50,12 @@ generateButton.addEventListener("click", resetArray);
 arraySizeSlider.addEventListener("input", updateArraySize);
 
 generateArray(Number(arraySizeSlider.value));
+
+//test bubble sort
+console.log("Before:", [...values]);
+bubbleSort(values, values.length);
+console.log("After:", [...values]);
+
 drawArray();
 
 console.log(arraySizeSlider.value);

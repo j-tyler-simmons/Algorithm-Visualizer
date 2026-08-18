@@ -29,14 +29,25 @@ const nextButton = document.getElementById("next-button");
 const arraySizeSlider = document.getElementById("array-size");
 const arraySizeValue = document.getElementById("array-size-value");
 
-function drawArray(array) {
+function drawArray(step) {
     //delete children
     container.innerHTML = "";
-    for (let i = 0; i < array.length; i++) {
+    for (let i = 0; i < step.values.length; i++) {
         const bar = document.createElement("div");
 
         bar.classList.add("bar");
-        bar.style.height = `${array[i] * 3}px`;
+
+        if (step.indices.includes(i)) {
+           if (step.type === "compare") {
+                bar.classList.add("compare");
+           }
+
+           if (step.type === "swap") {
+                bar.classList.add("swap");
+           }
+        }
+        
+        bar.style.height = `${step.values[i] * 3}px`;
 
         container.appendChild(bar);
     }
@@ -50,7 +61,7 @@ function resetArray() {
     sortSteps = bubbleSort([...values]);
     currentStep = 0;
 
-    drawArray(sortSteps[currentStep].values);
+    drawArray(sortSteps[currentStep]);
 }
 
 function updateArraySize() {
@@ -70,27 +81,24 @@ currentStep = 0;
 
 console.log(sortSteps);
 
-//back and next button functionality
-currentStep = 0;
-
 function nextStep() {
     if (currentStep < sortSteps.length - 1) {
         currentStep++;
-        drawArray(sortSteps[currentStep].values);
+        drawArray(sortSteps[currentStep]);
     }
 }
 
 function previousStep() {
     if (currentStep > 0) {
         currentStep--;
-        drawArray(sortSteps[currentStep].values);
+        drawArray(sortSteps[currentStep]);
     }
 }
 
 backButton.addEventListener("click", previousStep);
 nextButton.addEventListener("click", nextStep);
 
-drawArray(sortSteps[currentStep].values);
+drawArray(sortSteps[currentStep]);
 
 console.log(arraySizeSlider.value);
 console.log(values);

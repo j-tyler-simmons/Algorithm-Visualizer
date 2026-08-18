@@ -17,3 +17,11 @@ h1 {
     flex: 1;
     background-color: steelblue;
 }
+
+.compare {
+    background-color: orange;
+}
+
+.swap {
+    background-color: red;
+}

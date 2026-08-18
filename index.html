@@ -17,53 +17,56 @@
             <p>Bubble Sort</p>
         </header>
         
-        <section class="controls">
+        <div class="slider-groups">
 
-            <div class="control-group">
-                <label for="array-size">Array Size:</label>
+            <div class="array-controls">
 
-                <div class="slider-row">
-                    <input
-                        type="range"
-                        id="array-size"
-                        min="5"
-                        max="100"
-                        value="20"
-                    >
+                <div class="control-group">
+                    <label for="array-size">Array Size:</label>
 
-                    <span id="array-size-value"></span>
+                    <div class="slider-row">
+                        <input
+                            type="range"
+                            id="array-size"
+                            min="5"
+                            max="100"
+                            value="20"
+                        >
+
+                        <span id="array-size-value"></span>
+                    </div>
+                </div>
+
+                <button id="generate-button">Generate New Array</button>
+
+            </div>
+            
+            <div class="playback-controls">
+
+                <div class="control-group">
+                    <label for="playback-speed">Playback Speed</label>
+                    
+                    <div class="slider-row">
+                        <input
+                            type="range"
+                            id="playback-speed"
+                            min="50"
+                            max="1000"
+                            value="250"
+                            step="50"
+                        >
+                        <span id="playback-speed-value"></span>
+                    </div>
+
+                    <div class="step-buttons">
+                        <button id="back-button">⏮</button>
+                        <button id="play-pause-button">▶</button>
+                        <button id="next-button">⏭</button>
+                    </div>
+
                 </div>
             </div>
-            
-            <div class="control-group">
-                <label for="playback-speed">Playback Speed</label>
-                
-                <div class="slider-row">
-                    <input
-                        type="range"
-                        id="playback-speed"
-                        min="50"
-                        max="1000"
-                        value="250"
-                        step="50"
-                    >
-                    <span id="playback-speed-value"></span>
-                </div>
-            </div>
-        </section>
 
-        <div class="button-row">
-            <button id="generate-button">Generate New Array</button>
-            
-            <div class="step-buttons">
-                <button id="back-button">Back</button>
-                <button id="next-button">Next</button>
-            </div>
-            
-            <div class="playback-buttons">
-                <button id="play-button">Play</button>
-                <button id="pause-button">Pause</button>
-            </div>
         </div>
 
         <div id="step-status">

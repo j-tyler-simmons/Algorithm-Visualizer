@@ -29,8 +29,7 @@ const container = document.getElementById("array-container");
 const generateButton = document.getElementById("generate-button");
 const backButton = document.getElementById("back-button");
 const nextButton = document.getElementById("next-button");
-const playButton = document.getElementById("play-button");
-const pauseButton = document.getElementById("pause-button");
+const playPauseButton = document.getElementById("play-pause-button");
 
 const arraySizeSlider = document.getElementById("array-size");
 const arraySizeValue = document.getElementById("array-size-value");
@@ -134,6 +133,7 @@ function previousStep() {
 
 function pause() {
     isPlaying = false;
+    playPauseButton.textContent = "▶";
 
     if (playTimeout !== null) {
         clearTimeout(playTimeout);
@@ -147,6 +147,7 @@ function play() {
     }
 
     isPlaying = true;
+    playPauseButton.textContent = "⏸";
     playNextStep();
 }
 
@@ -165,6 +166,15 @@ function playNextStep() {
     playTimeout = setTimeout(playNextStep, playbackDelay);
 }
 
+function togglePlayback() {
+    if (isPlaying) {
+        pause();
+        return;
+    }
+
+    play();
+}
+
 function updatePlaybackSpeed() {
     playbackDelay = Number(playbackSpeedSlider.value);
     playbackSpeedValue.textContent = `${playbackDelay} ms`;
@@ -172,8 +182,7 @@ function updatePlaybackSpeed() {
 
 backButton.addEventListener("click", previousStep);
 nextButton.addEventListener("click", nextStep);
-playButton.addEventListener("click", play);
-pauseButton.addEventListener("click", pause);
+playPauseButton.addEventListener("click", togglePlayback);
 
 playbackSpeedSlider.addEventListener("input", updatePlaybackSpeed);
 

@@ -1,4 +1,5 @@
 import { bubbleSort } from "./algorithms/sorting/bubbleSort.js"
+import { selectionSort } from "./algorithms/sorting/selectionSort.js"
 
 const values = [];
 const min = 10;
@@ -38,6 +39,22 @@ const stepStatus = document.getElementById("step-status");
 
 const playbackSpeedSlider = document.getElementById("playback-speed");
 const playbackSpeedValue = document.getElementById("playback-speed-value");
+
+const algorithmSelect = document.getElementById("algorithm-select");
+const algortithmName = document.getElementById("algorithm-name");
+
+//generate based on sorting algorithm
+function generateSortSteps() {
+    if (algorithmSelect.value === "bubble") {
+        sortSteps = bubbleSort([...values]);
+    }
+
+    if (algorithmSelect.value === "selection") {
+        sortSteps = selectionSort([...values]);
+    }
+
+    currentStep = 0;
+}
 
 //updating the step status
 function updateStepStatus() {
@@ -91,8 +108,7 @@ function resetArray() {
 
     generateArray(size);
     
-    sortSteps = bubbleSort([...values]);
-    currentStep = 0;
+    generateSortSteps();
 
     drawArray(sortSteps[currentStep]);
     updateStepStatus();
@@ -110,8 +126,7 @@ generateArray(Number(arraySizeSlider.value));
 //test bubble sort
 console.log("Original:", [...values]);
 
-sortSteps = bubbleSort([...values]);
-currentStep = 0;
+generateSortSteps();
 
 console.log(sortSteps);
 
@@ -180,16 +195,34 @@ function updatePlaybackSpeed() {
     playbackSpeedValue.textContent = `${playbackDelay} ms`;
 }
 
+function updateAlgorithmName() {
+    algortithmName.textContent =
+        algorithmSelect.options[algorithmSelect.selectedIndex].text;
+}
+
+function changeAlgorithm() {
+    pause();
+
+    generateSortSteps();
+    updateAlgorithmName();
+
+    drawArray(sortSteps[currentStep]);
+    updateStepStatus();   
+}
+
 backButton.addEventListener("click", previousStep);
 nextButton.addEventListener("click", nextStep);
 playPauseButton.addEventListener("click", togglePlayback);
 
 playbackSpeedSlider.addEventListener("input", updatePlaybackSpeed);
 
+algorithmSelect.addEventListener("change", changeAlgorithm);
+
 drawArray(sortSteps[currentStep]);
 updateStepStatus();
 updateArraySize();
 updatePlaybackSpeed();
+updateAlgorithmName();
 
 console.log(arraySizeSlider.value);
 console.log(values);

@@ -152,6 +152,14 @@ body {
     background-color: red;
 }
 
+.shift {
+    background-color: purple;
+}
+
+.insert {
+    background-color: green;
+}
+
 .step-buttons {
     align-self: center;
 }

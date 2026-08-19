@@ -1,5 +1,6 @@
 import { bubbleSort } from "./algorithms/sorting/bubbleSort.js"
 import { selectionSort } from "./algorithms/sorting/selectionSort.js"
+import { insertionSort} from "./algorithms/sorting/insertionSort.js"
 
 const values = [];
 const min = 10;
@@ -53,6 +54,10 @@ function generateSortSteps() {
         sortSteps = selectionSort([...values]);
     }
 
+    if (algorithmSelect.value === "insertion") {
+        sortSteps = insertionSort([...values]);
+    }
+
     currentStep = 0;
 }
 
@@ -74,6 +79,14 @@ function updateStepStatus() {
         message += " - Initial array";
     }
 
+    if (step.type === "shift") {
+        message += ` - Shifted index ${step.indices[0]} to ${step.indices[1]}`;
+    }
+
+    if (step.type === "insert") {
+        message += ` - Inserted value at index ${step.indices[0]}`;
+    }
+
     stepStatus.textContent = message;
 }
 
@@ -92,6 +105,14 @@ function drawArray(step) {
 
            if (step.type === "swap") {
                 bar.classList.add("swap");
+           }
+
+           if (step.type === "shift") {
+                bar.classList.add("shift");
+           }
+
+           if (step.type === "insert") {
+                bar.classList.add("insert");
            }
         }
         

@@ -160,6 +160,10 @@ body {
     background-color: green;
 }
 
+.pivot {
+    background-color: silver;
+}
+
 .step-buttons {
     align-self: center;
 }

@@ -1,6 +1,7 @@
 import { bubbleSort } from "./algorithms/sorting/bubbleSort.js"
 import { selectionSort } from "./algorithms/sorting/selectionSort.js"
 import { insertionSort} from "./algorithms/sorting/insertionSort.js"
+import { quickSort } from "./algorithms/sorting/quickSort.js"
 
 const values = [];
 const min = 10;
@@ -58,6 +59,10 @@ function generateSortSteps() {
         sortSteps = insertionSort([...values]);
     }
 
+    if (algorithmSelect.value === "quick") {
+        sortSteps = quickSort([...values]);
+    }
+
     currentStep = 0;
 }
 
@@ -87,6 +92,10 @@ function updateStepStatus() {
         message += ` - Inserted value at index ${step.indices[0]}`;
     }
 
+    if (step.type === "pivot") {
+        message += ` - Pivot selected at index ${step.indices[0]}`;
+    }
+
     stepStatus.textContent = message;
 }
 
@@ -113,6 +122,10 @@ function drawArray(step) {
 
            if (step.type === "insert") {
                 bar.classList.add("insert");
+           }
+
+           if (step.type === "pivot") {
+                bar.classList.add("pivot");
            }
         }
         

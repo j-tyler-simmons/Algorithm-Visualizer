@@ -113,57 +113,6 @@ body {
     gap: 6px;
 }
 
-#array-container {
-    display: flex;
-    align-items: flex-end;
-
-    height: 400px;
-    gap: 4px;
-
-    padding: 24px;
-
-    background-color: white;
-    border: 1px solid #d9dee7;
-    border-radius: 14px;
-
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-}
-
-#step-status {
-    margin-top: 16px;
-    margin-bottom: 16px;
-    padding: 10px 14px;
-    text-align: center;
-    background-color: white;
-    border: 1px solid #c5cbd3;
-    border-radius: 6px;
-}
-
-.bar {
-    flex: 1;
-    background-color: steelblue;
-}
-
-.compare {
-    background-color: orange;
-}
-
-.swap {
-    background-color: red;
-}
-
-.shift {
-    background-color: purple;
-}
-
-.insert {
-    background-color: green;
-}
-
-.pivot {
-    background-color: silver;
-}
-
 .step-buttons {
     align-self: center;
 }
@@ -175,6 +124,10 @@ button {
     background-color: white;
     font-size: 14px;
     cursor: pointer;
+}
+
+button:hover {
+    background-color: #eef1f5;
 }
 
 #play-pause-button {
@@ -213,7 +166,9 @@ button {
 }
 
 #step-status {
+    margin-top: 16px;
     margin-bottom: 24px;
+
     padding: 14px 18px;
 
     text-align: center;
@@ -223,4 +178,140 @@ button {
     border-radius: 12px;
 
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+}
+
+#array-container {
+    display: flex;
+    align-items: flex-end;
+
+    height: 400px;
+    gap: 4px;
+
+    padding: 24px;
+
+    background-color: white;
+    border: 1px solid #d9dee7;
+    border-radius: 14px;
+
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.bar {
+    flex: 1;
+    background-color: steelblue;
+}
+
+.compare {
+    background-color: orange;
+}
+
+.swap {
+    background-color: red;
+}
+
+.shift {
+    background-color: purple;
+}
+
+.insert {
+    background-color: green;
+}
+
+.pivot {
+    background-color: silver;
+}
+
+.write {
+    background-color: teal;
+}
+
+.split-boundary {
+    margin-right: 24px;
+}
+
+.inactive {
+    opacity: 0.3;
+}
+
+/* Merge Sort tree */
+
+#merge-tree-container {
+    display: none;
+
+    grid-template-columns: repeat(var(--merge-columns), 1fr);
+    grid-auto-rows: 44px;
+
+    align-items: center;
+
+    padding: 24px;
+
+    position: relative;
+
+    background-color: white;
+    border: 1px solid #d9dee7;
+    border-radius: 14px;
+
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.merge-grid-node {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.merge-list {
+    width: fit-content;
+
+    display: flex;
+    gap: 6px;
+
+    padding: 8px 12px;
+
+    background-color: white;
+    border: 1px solid #c5cbd3;
+    border-radius: 6px;
+
+    white-space: nowrap;
+}
+
+.active-merge-node {
+    border: 2px solid #2563eb;
+    background-color: #eff6ff;
+}
+
+.merge-tree-lines {
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    pointer-events: none;
+}
+
+.merge-tree-line {
+    stroke: #aeb6c2;
+    stroke-width: 1;
+}
+
+.merged-node {
+    background-color: #ecfdf5;
+    border-color: #10b981;
+}
+
+.merge-value {
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.merge-compare-value {
+    background-color: orange;
+}
+
+.merge-write-value {
+    background-color: teal;
+    color: white;
 }

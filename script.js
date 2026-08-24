@@ -2,6 +2,7 @@ import { bubbleSort } from "./algorithms/sorting/bubbleSort.js"
 import { selectionSort } from "./algorithms/sorting/selectionSort.js"
 import { insertionSort} from "./algorithms/sorting/insertionSort.js"
 import { quickSort } from "./algorithms/sorting/quickSort.js"
+import { mergeSort } from "./algorithms/sorting/mergeSort.js"
 
 const values = [];
 const min = 10;
@@ -13,6 +14,8 @@ let currentStep = 0;
 let playTimeout = null;
 let isPlaying = false;
 let playbackDelay = 250;
+
+let mergeTree = null;
 
 function randomInt(min, max) {
     return Math.floor(Math.random()*(max - min + 1) + min);
@@ -28,6 +31,7 @@ function generateArray(size) {
 }
 
 const container = document.getElementById("array-container");
+const mergeTreeContainer = document.getElementById("merge-tree-container");
 
 const generateButton = document.getElementById("generate-button");
 const backButton = document.getElementById("back-button");
@@ -43,7 +47,7 @@ const playbackSpeedSlider = document.getElementById("playback-speed");
 const playbackSpeedValue = document.getElementById("playback-speed-value");
 
 const algorithmSelect = document.getElementById("algorithm-select");
-const algortithmName = document.getElementById("algorithm-name");
+const algorithmName = document.getElementById("algorithm-name");
 
 //generate based on sorting algorithm
 function generateSortSteps() {
@@ -61,6 +65,16 @@ function generateSortSteps() {
 
     if (algorithmSelect.value === "quick") {
         sortSteps = quickSort([...values]);
+    }
+
+    if (algorithmSelect.value === "merge") {
+        sortSteps = mergeSort([...values]);
+
+        mergeTree = buildMergeTree(
+            values,
+            0,
+            values.length - 1
+        );
     }
 
     currentStep = 0;
@@ -96,6 +110,18 @@ function updateStepStatus() {
         message += ` - Pivot selected at index ${step.indices[0]}`;
     }
 
+    if (step.type === "write") {
+        message += ` - Wrote value at index ${step.indices[0]}`;
+    }
+
+    if (step.type === "split") {
+        message += ` - Splitting indices ${step.left} through ${step.right}`;
+    }
+
+    if (step.type === "merge-complete") {
+        message += ` - Merged indices ${step.left} through ${step.right}`;
+    }
+
     stepStatus.textContent = message;
 }
 
@@ -127,11 +153,369 @@ function drawArray(step) {
            if (step.type === "pivot") {
                 bar.classList.add("pivot");
            }
+
+           if (step.type === "write") {
+                bar.classList.add("write");
+           }
+        }
+
+        if (step.type === "split" && i === step.mid) {
+                bar.classList.add("split-boundary");
+        }
+
+        if (step.type === "split" &&
+            (i < step.left || i > step.right)) {
+            bar.classList.add("inactive");
         }
         
         bar.style.height = `${step.values[i] * 3}px`;
 
         container.appendChild(bar);
+    }
+}
+
+function buildMergeTree(values, left, right, depth = 0) {
+    const node = {
+        left: left,
+        right: right,
+        depth: depth,
+        values: values.slice(left, right + 1),
+        leftChild: null,
+        rightChild: null
+    };
+
+    if (left >= right) {
+        return node;
+    }
+
+    const mid = Math.floor((left + right) / 2);
+
+    node.leftChild = buildMergeTree(
+        values,
+        left,
+        mid,
+        depth + 1
+    );
+
+    node.rightChild = buildMergeTree(
+        values,
+        mid + 1,
+        right,
+        depth + 1
+    );
+
+    return node;
+}
+
+function mergeNodeHasAppeared(node) {
+    // Root exists from the beginning
+    if (
+        node.left === 0 &&
+        node.right === values.length - 1
+    ) {
+        return true;
+    }
+
+    for (let i = 0; i <= currentStep; i++) {
+        const step = sortSteps[i];
+
+        if (step.type !== "split") {
+            continue;
+        }
+
+        // Was this node created as the left child?
+        if (
+            node.left === step.left &&
+            node.right === step.mid
+        ) {
+            return true;
+        }
+
+        // Was this node created as the right child?
+        if (
+            node.left === step.mid + 1 &&
+            node.right === step.right
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function getMergeNodeValues(node) {
+    let displayedValues = node.values;
+
+    for (let i = 0; i <= currentStep; i++) {
+        const step = sortSteps[i];
+
+        if (
+            step.type === "merge-complete" &&
+            step.left === node.left &&
+            step.right === node.right
+        ) {
+            displayedValues = step.values.slice(
+                node.left,
+                node.right + 1
+            );
+        }
+    }
+
+    return displayedValues;
+}
+
+function addMergeConnector(parent, child) {
+    const connector = document.createElement("div");
+    connector.classList.add("merge-connector");
+
+    const parentCenter = parent.left + parent.right + 2;
+    const childCenter = child.left + child.right + 2;
+    const startColumn = Math.min(parentCenter, childCenter);
+    const endColumn = Math.max(parentCenter, childCenter);
+
+    connector.style.gridColumn = `${startColumn} / ${endColumn + 1}`;
+    connector.style.gridRow = `${parent.depth * 2 + 2}`;
+
+    mergeTreeContainer.appendChild(connector);
+}
+
+function addMergeValues(valueBox, node, displayedValues, step) {
+    for (let i = 0; i < displayedValues.length; i++) {
+        const value = document.createElement("span");
+
+        value.classList.add("merge-value");
+        value.textContent = displayedValues[i];
+
+        const globalIndex = node.left + i;
+
+        if (
+            step.left === node.left &&
+            step.right === node.right
+        ) {
+            if (
+                step.type === "compare" &&
+                step.indices.includes(globalIndex)
+            ) {
+                value.classList.add("merge-compare-value");
+            }
+
+            if (
+                step.type === "write" &&
+                step.indices.includes(globalIndex)
+            ) {
+                value.classList.add("merge-write-value");   
+            }
+        }
+
+        valueBox.appendChild(value);
+    }
+}
+
+function addMergeNodeToGrid(node, step) {
+    if (!mergeNodeHasAppeared(node)) {
+        return;
+    }
+
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("merge-grid-node");
+
+    wrapper.id = `merge-node-${node.left}-${node.right}`;
+
+    wrapper.style.gridColumn = `${node.left * 2 + 1} / ${node.right * 2 + 3}`;
+
+    wrapper.style.gridRow = `${node.depth * 2 + 1}`;
+
+    const valueBox = document.createElement("div");
+    valueBox.classList.add("merge-list");
+
+    if (
+        step.left === node.left &&
+        step.right === node.right
+    ) {
+        valueBox.classList.add("active-merge-node");
+    }
+
+    for (let i = 0; i <= currentStep; i++) {
+        const historyStep = sortSteps[i];
+
+        if (
+            historyStep.type === "merge-complete" &&
+            historyStep.left === node.left &&
+            historyStep.right === node.right
+        ) {
+            valueBox.classList.add("merged-node");
+        }
+    }
+
+    const displayedValues = getMergeNodeValues(node);
+
+    addMergeValues(
+        valueBox,
+        node,
+        displayedValues,
+        step
+    );
+
+    wrapper.appendChild(valueBox);
+
+    mergeTreeContainer.appendChild(wrapper);
+
+    if (node.leftChild !== null &&
+        mergeNodeHasAppeared(node.leftChild)
+    ) {
+        addMergeConnector(node, node.leftChild);
+    }
+
+    if (node.rightChild !== null &&
+        mergeNodeHasAppeared(node.rightChild)
+    ) {
+        addMergeConnector(node, node.rightChild);
+    }
+
+    if (node.leftChild !== null) {
+        addMergeNodeToGrid(node.leftChild, step);
+    }
+
+    if (node.rightChild !== null) {
+        addMergeNodeToGrid(node.rightChild, step);
+    }
+}
+
+function drawConnection(
+    svg,
+    containerRect,
+    parentElement,
+    childNode
+) {
+    const childElement =
+        document.getElementById(
+            `merge-node-${childNode.left}-${childNode.right}`
+        );
+
+    if (childElement === null) {
+        return;
+    }
+
+    const parentRect = parentElement.getBoundingClientRect();
+    const childRect = childElement.getBoundingClientRect();
+
+    const x1 =
+        parentRect.left +
+        parentRect.width / 2 -
+        containerRect.left;
+
+    const y1 =
+        parentRect.bottom -
+        containerRect.top;
+
+    const x2 =
+        childRect.left +
+        childRect.width / 2 -
+        containerRect.left;
+    
+    const y2 =
+        childRect.top -
+        containerRect.top;
+    
+    const line = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "line"
+    );
+
+    line.setAttribute("x1", x1);
+    line.setAttribute("y1", y1);
+    line.setAttribute("x2", x2);
+    line.setAttribute("y2", y2);
+
+    line.classList.add("merge-tree-line");
+
+    svg.appendChild(line);
+}
+
+function drawMergeConnectors(svg) {
+    const containerRect = mergeTreeContainer.getBoundingClientRect();
+
+    function connectNode(node) {
+        if (!mergeNodeHasAppeared(node)) {
+            return;
+        }
+
+        const parentElement = document.getElementById(
+            `merge-node-${node.left}-${node.right}`
+        );
+
+        if (parentElement === null) {
+            return;
+        }
+
+        if (
+            node.leftChild !== null &&
+            mergeNodeHasAppeared(node.leftChild)
+        ) {
+            drawConnection(
+                svg,
+                containerRect,
+                parentElement,
+                node.leftChild
+            );
+
+            connectNode(node.leftChild);
+        }
+
+        if (
+            node.rightChild !== null &&
+            mergeNodeHasAppeared(node.rightChild)
+        ) {
+            drawConnection(
+                svg,
+                containerRect,
+                parentElement,
+                node.rightChild
+            );
+
+            connectNode(node.rightChild);
+        }
+    }
+
+    connectNode(mergeTree);
+}
+
+function drawMergeTree(step) {
+    mergeTreeContainer.innerHTML = "";
+
+    mergeTreeContainer.style.setProperty(
+        "--merge-columns",
+        values.length * 2
+    );
+
+    const svg = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "svg"
+    );
+
+    svg.classList.add("merge-tree-lines");
+
+    mergeTreeContainer.appendChild(svg);
+
+    addMergeNodeToGrid(mergeTree, step);
+
+    drawMergeConnectors(svg);
+}
+
+function drawCurrentStep() {
+    const step = sortSteps[currentStep];
+
+    if (algorithmSelect.value === "merge") {
+        container.style.display = "none";
+        mergeTreeContainer.style.display = "grid";
+
+        drawMergeTree(step);
+    }
+    else {
+        container.style.display = "flex";
+        mergeTreeContainer.style.display = "none";
+
+        drawArray(step);
     }
 }
 
@@ -144,8 +528,23 @@ function resetArray() {
     
     generateSortSteps();
 
-    drawArray(sortSteps[currentStep]);
+    drawCurrentStep();
     updateStepStatus();
+}
+
+function updateArraySizeLimit() {
+    if (algorithmSelect.value === "merge") {
+        arraySizeSlider.max = 16;
+
+        if (Number(arraySizeSlider.value) > 16) {
+            arraySizeSlider.value = 16;
+        }
+    }
+    else {
+        arraySizeSlider.max = 100;
+    }
+
+    updateArraySize();
 }
 
 function updateArraySize() {
@@ -167,7 +566,7 @@ console.log(sortSteps);
 function nextStep() {
     if (currentStep < sortSteps.length - 1) {
         currentStep++;
-        drawArray(sortSteps[currentStep]);
+        drawCurrentStep();
         updateStepStatus();
     }
 }
@@ -175,7 +574,7 @@ function nextStep() {
 function previousStep() {
     if (currentStep > 0) {
         currentStep--;
-        drawArray(sortSteps[currentStep]);
+        drawCurrentStep();
         updateStepStatus();
     }
 }
@@ -230,17 +629,22 @@ function updatePlaybackSpeed() {
 }
 
 function updateAlgorithmName() {
-    algortithmName.textContent =
+    algorithmName.textContent =
         algorithmSelect.options[algorithmSelect.selectedIndex].text;
 }
 
 function changeAlgorithm() {
     pause();
 
+    updateArraySizeLimit();
+
+    const size = Number(arraySizeSlider.value);
+    generateArray(size);
+
     generateSortSteps();
     updateAlgorithmName();
 
-    drawArray(sortSteps[currentStep]);
+    drawCurrentStep();
     updateStepStatus();   
 }
 
@@ -252,7 +656,8 @@ playbackSpeedSlider.addEventListener("input", updatePlaybackSpeed);
 
 algorithmSelect.addEventListener("change", changeAlgorithm);
 
-drawArray(sortSteps[currentStep]);
+updateArraySizeLimit();
+drawCurrentStep();
 updateStepStatus();
 updateArraySize();
 updatePlaybackSpeed();

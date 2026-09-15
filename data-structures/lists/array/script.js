@@ -7,6 +7,8 @@ const operationInput = document.getElementById("operation-input");
 const runOperationButton = document.getElementById("run-operation");
 const operationStatus = document.getElementById("operation-status");
 
+const valueInput = document.getElementById("value-input");
+
 runOperationButton.addEventListener("click", runOperation);
 operationSelect.addEventListener(
     "change",
@@ -18,6 +20,8 @@ let highlightedIndex = null;
 let searchSteps = [];
 let currentSearchStep = 0;
 let searchDelay = 500;
+//update variables
+let updatedIndex = null;
 
 function drawArray(step = null) {
     arrayContainer.innerHTML = "";
@@ -37,6 +41,11 @@ function drawArray(step = null) {
         //highlight accessed index
         if (i === highlightedIndex) {
             value.classList.add("array-access");
+        }
+
+        //highlight updated index
+        if (i === updatedIndex) {
+            value.classList.add("array-update");
         }
 
         //highlight the current search step
@@ -65,9 +74,14 @@ function runOperation() {
     else if (operation === "search") {
         searchArray();
     }
+    else if (operation === "update") {
+        updateArray();
+    }
 }
 
 function accessArray() {
+    updatedIndex = null;
+
     const index = Number(operationInput.value);
 
     if (
@@ -119,6 +133,31 @@ function searchArray() {
     playSearchStep();
 }
 
+function updateArray() {
+    highlightedIndex = null;
+    updatedIndex = null;
+
+    const index = Number(operationInput.value);
+    const newValue = Number(valueInput.value);
+
+    if (
+        index < 0 ||
+        index >= values.length
+    ) {
+        operationStatus.textContent =
+            `Invalid index. Enter an index from 0 to ${values.length - 1}.`;
+        return;
+    }
+
+    values[index] = newValue;
+    updatedIndex = index;
+
+    drawArray();
+
+    operationStatus.textContent =
+        `Updated index ${index} to ${newValue}.`;
+}
+
 function playSearchStep() {
     if (currentSearchStep >= searchSteps.length) {
         return;
@@ -155,20 +194,32 @@ function updateOperationControls() {
 
     //clear visualization state from previous operation
     highlightedIndex = null;
+    updatedIndex = null;
     searchSteps = [];
     currentSearchStep = 0;
 
-    operationStatus.textContent = "Select an operation to begin.";
+    //clear inputs from previous operation
+    operationInput.value = "";
+    valueInput.value = "";
 
-    drawArray();
+    operationStatus.textContent = "Select an operation to begin.";
 
     if (operation === "access") {
         operationInput.placeholder = "Index";
+        valueInput.hidden = true;
     }
     else if (operation === "search") {
         operationInput.placeholder = "Value";
+        valueInput.hidden = true;
     }
+    else if (operation === "update") {
+        operationInput.placeholder = "Index";
+        valueInput.placeholder = "New Value";
+        valueInput.hidden = false;
+    }
+
+    drawArray();
 }
 
-//render
-drawArray();
+//initialize controls
+updateOperationControls();

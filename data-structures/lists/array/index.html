@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Array Visualizer</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <main class="app">
+        <header>
+            <h1>Array Visualizer</h1>
+            <p>
+                Visualize common array operations step by step.
+            </p>
+        </header>
+
+        <section class="array-controls">
+            <select id="operation-select">
+                <option value="access">Access</option>
+                <option value="search">Search</option>
+                <option value="update">Update</option>
+                <option value="insert">Insert</option>
+                <option value="delete">Delete</option>
+            </select>
+
+            <input
+                id="index-input"
+                type="number"
+                min="0"
+                placeholder="Index"
+            >
+
+            <button id="run-operation">Run</button>
+        </section>
+
+        <p id="operation-status">Select an operation to begin.</p>
+
+        <section id="array-container"></section>
+    </main>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>

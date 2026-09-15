@@ -1,0 +1,30 @@
+#array-container {
+    display: flex;
+    justify-content: center;
+}
+
+.array-value {
+    width: 60px;
+    height: 60px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border: 1px solid #c5cbd3;
+    background-color: white;
+
+    font-size: 20px;
+}
+
+.array-index {
+    text-align: center;
+    margin-bottom: 6px;
+    color: #666;
+    font-size: 14px;
+}
+
+.array-access {
+    background-color: #eff6ff;
+    border: 2px solid #2563eb;
+}

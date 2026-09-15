@@ -28,3 +28,12 @@
     background-color: #eff6ff;
     border: 2px solid #2563eb;
 }
+
+.array-search {
+    background-color: orange;
+}
+
+.array-found {
+    background-color: #ecfdf5;
+    border: 2px solid #10b981;
+}

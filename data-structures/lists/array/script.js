@@ -1,6 +1,8 @@
 const values = [17, 42, 8, 91, 33];
 
 const arrayContainer = document.getElementById("array-container");
+const arraySizeInput = document.getElementById("array-size");
+const generateArrayButton = document.getElementById("generate-array");
 
 const operationSelect = document.getElementById("operation-select");
 const operationInput = document.getElementById("operation-input");
@@ -14,6 +16,7 @@ operationSelect.addEventListener(
     "change",
     updateOperationControls
 );
+generateArrayButton.addEventListener("click", generateArray);
 
 let highlightedIndex = null;
 //search variables
@@ -218,6 +221,37 @@ function updateOperationControls() {
         valueInput.hidden = false;
     }
 
+    drawArray();
+}
+
+function generateArray() {
+    const size = Number(arraySizeInput.value);
+
+    if (
+        arraySizeInput.value === "" ||
+        size < 1 ||
+        size > 20
+    ) {
+        operationStatus.textContent =
+            "Array size must be between 1 and 20.";
+        return;
+    }
+
+    values.length = 0;
+
+    for (let i = 0; i < size; i++) {
+        const randomValue = Math.floor(Math.random() * 100) + 1;
+        values.push(randomValue);
+    }
+
+    highlightedIndex = null;
+    updatedIndex = null;
+    searchSteps = [];
+    currentSearchStep = 0;
+
+    operationStatus.textContent =
+        `Generated an array of size ${size}.`;
+    
     drawArray();
 }
 

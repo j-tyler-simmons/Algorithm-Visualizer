@@ -13,19 +13,33 @@
 <body>
     <main class="app">
         <header>
-            <h1>Array Visualizer</h1>
+            <h1>Static Array Visualizer</h1>
             <p>
                 Visualize common array operations step by step.
             </p>
         </header>
+
+        <section class="array-generator">
+            <label for="array-size">Array Size:</label>
+
+            <input
+                id="array-size"
+                type="number"
+                min="1"
+                max="20"
+                value="5"
+            >
+
+            <button id="generate-array">
+                Generate Array
+            </button>
+        </section>
 
         <section class="array-controls">
             <select id="operation-select">
                 <option value="access">Access</option>
                 <option value="search">Search</option>
                 <option value="update">Update</option>
-                <option value="insert">Insert</option>
-                <option value="delete">Delete</option>
             </select>
 
             <input

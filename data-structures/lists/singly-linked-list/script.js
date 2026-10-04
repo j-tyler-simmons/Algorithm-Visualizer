@@ -149,8 +149,17 @@ let searchSteps = [];
 let currentSearchStep = 0;
 let searchTimeout = null;
 const searchDelay = 500;
+let deleteSteps = [];
+let currentDeleteStep = 0;
+const deleteDelay = 500;
+let deleteTimeout = null;
 
 function runOperation() {
+    if (deleteTimeout !== null) {
+        clearTimeout(deleteTimeout);
+        deleteTimeout = null;
+    }
+
     if (searchTimeout !== null) {
         clearTimeout(searchTimeout);
         searchTimeout = null;
@@ -199,6 +208,94 @@ function runOperation() {
 
         searchList(value);
         playSearchStep();
+    }
+
+    else if (operation === "delete") {
+        if (operationInput.value === "") {
+            operationStatus.textContent = "Please enter a value.";
+
+            return;
+        }
+
+        const value = Number(operationInput.value);
+
+        prepareDelete(value);
+        playDeleteStep(value);
+    }
+}
+
+function prepareDelete(value) {
+    deleteSteps = [];
+
+    let current = list.head;
+
+    while (current !== null) {
+        deleteSteps.push({
+            type: "compare",
+            node: current
+        });
+
+        if (current.value === value) {
+            deleteSteps.push({
+                type: "delete",
+                node: current
+            });
+
+            break;
+        }
+
+        current = current.next;
+    }
+
+    if (current === null) {
+        deleteSteps.push({
+            type: "not-found",
+            node: null
+        });
+    }
+
+    currentDeleteStep = 0;
+}
+
+function playDeleteStep(value) {
+    if (currentDeleteStep >= deleteSteps.length) {
+        return;
+    }
+
+    const step = deleteSteps[currentDeleteStep];
+
+    if (step.type === "compare") {
+        drawList(step.node, "compare");
+
+        operationStatus.textContent = `Checking node containing ${step.node.value}.`;
+    }
+    else if (step.type === "delete") {
+        drawList(step.node, "delete");
+
+        operationStatus.textContent = `Deleting node containing ${step.node.value}.`;
+
+        deleteTimeout = setTimeout(() => {
+            list.delete(value);
+            drawList();
+
+            operationStatus.textContent = `Deleted ${value} from the list.`;
+        }, deleteDelay);
+
+        return;
+    }
+    else if (step.type === "not-found") {
+        drawList();
+
+        operationStatus.textContent = `${value} was not found in the list.`;
+    }
+
+    currentDeleteStep++;
+
+    if (currentDeleteStep < deleteSteps.length) {
+        deleteTimeout = setTimeout(
+            () => playDeleteStep(value),
+            deleteDelay
+        );
     }
 }
 
@@ -272,6 +369,9 @@ function drawList(highlightedNode = null, highlightType = "compare") {
         if (current === highlightedNode) {
             if (highlightType === "found") {
                 nodeElement.classList.add("list-found");
+            }
+            else if (highlightType === "delete") {
+                nodeElement.classList.add("list-delete");
             }
             else {
                 nodeElement.classList.add("list-search");
@@ -362,5 +462,8 @@ function createArrow() {
 list.insert(10);
 list.insert(20);
 list.insert(40);
+
+prepareDelete(20);
+console.log(deleteSteps);
 
 drawList();

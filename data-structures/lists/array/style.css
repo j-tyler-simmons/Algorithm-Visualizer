@@ -1,0 +1,93 @@
+#array-container {
+    display: flex;
+    justify-content: center;
+}
+
+.array-value {
+    width: 60px;
+    height: 60px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border: 1px solid #c5cbd3;
+    background-color: white;
+
+    font-size: 20px;
+}
+
+.array-index {
+    text-align: center;
+    margin-bottom: 6px;
+    color: #666;
+    font-size: 14px;
+}
+
+.array-access {
+    background-color: #eff6ff;
+    border: 2px solid #2563eb;
+}
+
+.array-search {
+    background-color: orange;
+}
+
+.array-found {
+    background-color: #ecfdf5;
+    border: 2px solid #10b981;
+}
+
+.array-update {
+    background-color: #f3e8ff;
+    border: 2px solid #9333ea;
+}
+
+.array-generator,
+.array-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.array-generator input,
+.array-controls input,
+.array-controls select {
+    padding: 8px 10px;
+    border: 1px solid #c5cbd3;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.array-generator button,
+.array-controls button {
+    padding: 8px 14px;
+    border: 1px solid #c5cbd3;
+    border-radius: 6px;
+    background-color: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.array-generator button:hover,
+.array-controls button:hover {
+    background-color: #f3f4f6;
+}
+
+.app {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 3px;
+}
+
+.app header{
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+#operation-status {
+    text-align: center;
+    margin: 20px 0;
+}

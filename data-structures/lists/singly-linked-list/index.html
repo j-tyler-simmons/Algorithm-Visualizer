@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Singly Linked List Visualizer</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <main class="app">
+        <header>
+            <h1>Singly Linked List Visualizer</h1>
+            <p>
+                Visualize common singly linked list operations step by step.
+            </p>
+        </header>
+
+        <section class="list-controls">
+            <select id="operation-select">
+                <option value="insert">Insert</option>
+                <option value="insert-in-order">Insert in Order</option>
+                <option value="search">Search</option>
+                <option value="delete">Delete</option>
+                <option value="reverse">Reverse</option>
+                <option value="clear">Clear</option>
+            </select>
+
+            <input
+                id="operation-input"
+                type="number"
+                placeholder="Value"
+            >
+
+            <button id="run-operation">
+                Run
+            </button>
+        </section>
+
+        <p id="operation-status">
+            Select an operation to begin.
+        </p>
+
+        <section id="list-container"></section>
+    </main>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>

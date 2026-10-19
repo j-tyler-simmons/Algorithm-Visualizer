@@ -48,13 +48,13 @@ class SinglyLinkedList {
         if (this.head === null) {
             this.head = newNode;
             this.tail = newNode;
-            return;
+            return newNode;
         }
 
         if (newNode.value <= this.head.value) {
             newNode.next = this.head;
             this.head = newNode;
-            return;
+            return newNode;
         }
 
         let prev = this.head;
@@ -71,6 +71,8 @@ class SinglyLinkedList {
         if (current == null) {
             this.tail = newNode;
         }
+
+        return newNode;
     }
 
     reverse(current = this.head, isInitialCall = true) {
@@ -142,17 +144,45 @@ const operationInput = document.getElementById("operation-input");
 const runOperationButton = document.getElementById("run-operation");
 const operationStatus = document.getElementById("operation-status");
 
+// event listeners
 runOperationButton.addEventListener("click", runOperation);
+operationSelect.addEventListener("change", updateOperationInput);
+updateOperationInput();
 
 // animation variables
 let searchSteps = [];
 let currentSearchStep = 0;
 let searchTimeout = null;
 const searchDelay = 500;
+
 let deleteSteps = [];
 let currentDeleteStep = 0;
 const deleteDelay = 500;
 let deleteTimeout = null;
+
+const insertDelay = 500;
+let insertTimeout = null;
+
+let orderedInsertSteps = [];
+let currentOrderedInsertStep = 0;
+let orderedInsertTimeout = null;
+const orderedInsertDelay = 500;
+
+const clearDelay = 500;
+let clearTimer = null;
+let clearNodes = [];
+let currentClearStep = 0;
+
+function updateOperationInput() {
+    const operation = operationSelect.value;
+
+    if (operation === "clear" || operation === "reverse") {
+        operationInput.style.display = "none";
+    }
+    else {
+        operationInput.style.display = "";
+    }
+}
 
 function runOperation() {
     if (deleteTimeout !== null) {
@@ -163,6 +193,21 @@ function runOperation() {
     if (searchTimeout !== null) {
         clearTimeout(searchTimeout);
         searchTimeout = null;
+    }
+
+    if (insertTimeout !== null) {
+        clearTimeout(insertTimeout);
+        insertTimeout = null;
+    }
+
+    if (orderedInsertTimeout !== null) {
+        clearTimeout(orderedInsertTimeout);
+        orderedInsertTimeout = null;
+    }
+
+    if (clearTimer !== null) {
+        clearTimeout(clearTimer);
+        clearTimer = null;
     }
 
     const operation = operationSelect.value;
@@ -177,9 +222,15 @@ function runOperation() {
         const value = Number(operationInput.value);
 
         list.insert(value);
-        drawList();
+        drawList(list.tail, "insert");
 
-        operationStatus.textContent = `Inserted ${value} at the end of the list.`;
+        operationStatus.textContent = `Inserting ${value} at the end of the list.`;
+
+        insertTimeout = setTimeout(() => {
+            drawList();
+
+            operationStatus.textContent = `Inserted ${value} at the end of the list.`;
+        }, insertDelay);
     }
 
     else if (operation === "insert-in-order") {
@@ -191,10 +242,8 @@ function runOperation() {
 
         const value = Number(operationInput.value);
 
-        list.insertInOrder(value);
-        drawList();
-
-        operationStatus.textContent = `Inserted ${value} in ascending order.`;
+        prepareOrderedInsert(value);
+        playOrderedInsertStep(value);
     }
 
     else if (operation === "search") {
@@ -221,6 +270,69 @@ function runOperation() {
 
         prepareDelete(value);
         playDeleteStep(value);
+    }
+
+    else if (operation === "clear") {
+        animateClear();
+    }
+}
+
+function prepareOrderedInsert(value) {
+    orderedInsertSteps = [];
+    currentOrderedInsertStep = 0;
+
+    let current = list.head;
+
+    while (current !== null && current.value < value) {
+        orderedInsertSteps.push({
+            type: "compare",
+            node: current
+        });
+
+        current = current.next;
+    }
+
+    orderedInsertSteps.push({
+        type: "insert",
+        node: current
+    });
+}
+
+function playOrderedInsertStep(value) {
+    if (currentOrderedInsertStep >= orderedInsertSteps.length) {
+        return;
+    }
+
+    const step = orderedInsertSteps[currentOrderedInsertStep];
+
+    if (step.type === "compare") {
+        drawList(step.node, "compare");
+
+        operationStatus.textContent = `Checking node containing ${step.node.value}.`;
+    }
+    else if (step.type === "insert") {
+        const insertedNode = list.insertInOrder(value);
+
+        drawList(insertedNode, "insert");
+
+        operationStatus.textContent = `Inserting ${value} in ascending order.`;
+
+        orderedInsertTimeout = setTimeout(() => {
+            drawList();
+
+            operationStatus.textContent = `Inserted ${value} in ascending order.`;
+        }, orderedInsertDelay);
+
+        return;
+    }
+
+    currentOrderedInsertStep++;
+
+    if (currentOrderedInsertStep < orderedInsertSteps.length) {
+        orderedInsertTimeout = setTimeout(
+            () => playOrderedInsertStep(value),
+            orderedInsertDelay
+        );
     }
 }
 
@@ -358,12 +470,63 @@ function playSearchStep() {
     }
 }
 
-function drawList(highlightedNode = null, highlightType = "compare") {
+function animateClear() {
+   runOperationButton.disabled = true;
+
+   clearNodes = [];
+
+   let current = list.head;
+
+   while (current !== null) {
+        clearNodes.push(current);
+        current = current.next;
+   }
+
+   currentClearStep = clearNodes.length - 1;
+   
+   playClearStep();
+}
+
+function playClearStep() {
+    if (currentClearStep < 0) {
+        list.clear();
+        drawList();
+
+        operationStatus.textContent = "List cleared.";
+        clearTimer = null;
+
+        runOperationButton.disabled = false;
+        
+        return;
+    }
+
+    const node = clearNodes[currentClearStep];
+
+    drawList(node, "delete", currentClearStep + 1);
+
+    operationStatus.textContent =
+        `Clearing node containing ${node.value}.`;
+    
+    clearTimer = setTimeout(() => {
+        currentClearStep--;
+        playClearStep();
+    }, clearDelay);
+}
+
+function drawList(
+    highlightedNode = null,
+    highlightType = "compare",
+    visibleCount = Infinity) {
     listContainer.innerHTML = "";
 
     let current = list.head;
+    let count = 0;
 
-    while (current !== null) {
+    const isLastVisibleNode = (node) => {
+        return node.next === null || count === visibleCount - 1;
+    };
+
+    while (current !== null && count < visibleCount) {
         const nodeElement = document.createElement("div");
 
         if (current === highlightedNode) {
@@ -372,6 +535,9 @@ function drawList(highlightedNode = null, highlightType = "compare") {
             }
             else if (highlightType === "delete") {
                 nodeElement.classList.add("list-delete");
+            }
+            else if (highlightType === "insert") {
+                nodeElement.classList.add("list-insert");
             }
             else {
                 nodeElement.classList.add("list-search");
@@ -385,20 +551,20 @@ function drawList(highlightedNode = null, highlightType = "compare") {
             nodeElement.classList.add("list-head");
         }
 
-        if (current === list.tail) {
+        if (isLastVisibleNode(current)) {
             nodeElement.classList.add("list-tail");
         }
 
         const label = document.createElement("div");
         label.classList.add("node-label");
 
-        if (current === list.head && current === list.tail) {
+        if (current === list.head && isLastVisibleNode(current)) {
             label.textContent = "HEAD / TAIL";
         }
         else if (current === list.head) {
             label.textContent = "HEAD";
         }
-        else if (current === list.tail) {
+        else if (isLastVisibleNode(current)) {
             label.textContent = "TAIL";
         }
 
@@ -409,16 +575,17 @@ function drawList(highlightedNode = null, highlightType = "compare") {
         nodeWrapper.appendChild(nodeElement);
         listContainer.appendChild(nodeWrapper);
 
-        if (current.next !== null) {
+        if (!isLastVisibleNode(current)) {
             const arrow = createArrow();
-
             listContainer.appendChild(arrow);
         }
 
         current = current.next;
+        
+        count++;
     }
 
-    if (list.tail !== null) {
+    if (list.tail !== null && visibleCount > 0) {
         const nullArrow = createArrow();
 
         const nullLabel = document.createElement("div");
@@ -462,8 +629,5 @@ function createArrow() {
 list.insert(10);
 list.insert(20);
 list.insert(40);
-
-prepareDelete(20);
-console.log(deleteSteps);
 
 drawList();

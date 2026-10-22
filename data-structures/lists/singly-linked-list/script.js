@@ -173,6 +173,12 @@ let clearTimer = null;
 let clearNodes = [];
 let currentClearStep = 0;
 
+let reverseSteps = [];
+let currentReverseStep = 0;
+let reverseTimeout = null;
+const reverseDelay = 500;
+let reversedLinks = 0;
+
 function updateOperationInput() {
     const operation = operationSelect.value;
 
@@ -208,6 +214,11 @@ function runOperation() {
     if (clearTimer !== null) {
         clearTimeout(clearTimer);
         clearTimer = null;
+    }
+
+    if (reverseTimeout !== null) {
+        clearTimeout(reverseTimeout);
+        reverseTimeout = null;
     }
 
     const operation = operationSelect.value;
@@ -275,6 +286,82 @@ function runOperation() {
     else if (operation === "clear") {
         animateClear();
     }
+
+    else if (operation === "reverse") {
+        prepareReverse();
+        playReverseStep();
+    }
+}
+
+function prepareReverse() {
+    reverseSteps = [];
+    currentReverseStep = 0;
+    reversedLinks = 0;
+    runOperationButton.disabled = true;
+
+    let current = list.head;
+
+    while (current !== null) {
+        reverseSteps.push(current);
+        current = current.next;
+    }
+}
+
+function playReverseStep() {
+    if (currentReverseStep >= reverseSteps.length) {
+        reversedLinks = 0;
+        playReverseUnwindStep();
+
+        return;
+    }
+
+    const node = reverseSteps[currentReverseStep];
+
+    drawList(node, "compare");
+
+    operationStatus.textContent =
+        `Visiting node containing ${node.value}.`;
+    
+    currentReverseStep++;
+
+    reverseTimeout = setTimeout(
+        playReverseStep,
+        reverseDelay
+    );
+}
+
+function playReverseUnwindStep() {
+    const totalLinks = reverseSteps.length - 1;
+
+    if (reversedLinks >= totalLinks) {
+        list.reverse();
+        drawList();
+
+        operationStatus.textContent = "List reversed.";
+        reverseTimeout = null;
+        runOperationButton.disabled = false;
+
+        return;
+    }
+
+    reversedLinks++;
+
+    const node = reverseSteps[totalLinks - reversedLinks];
+
+    drawList(
+        node,
+        "compare",
+        Infinity,
+        reversedLinks
+    );
+
+    operationStatus.textContent =
+        `Reversing pointer from ${node.next.value} to ${node.value}.`;
+    
+    reverseTimeout = setTimeout(
+        playReverseUnwindStep,
+        reverseDelay
+    );
 }
 
 function prepareOrderedInsert(value) {
@@ -496,7 +583,7 @@ function playClearStep() {
         clearTimer = null;
 
         runOperationButton.disabled = false;
-        
+
         return;
     }
 
@@ -516,7 +603,8 @@ function playClearStep() {
 function drawList(
     highlightedNode = null,
     highlightType = "compare",
-    visibleCount = Infinity) {
+    visibleCount = Infinity,
+    reversedLinksCount = 0) {
     listContainer.innerHTML = "";
 
     let current = list.head;
@@ -576,7 +664,13 @@ function drawList(
         listContainer.appendChild(nodeWrapper);
 
         if (!isLastVisibleNode(current)) {
-            const arrow = createArrow();
+            const totalLinks = reverseSteps.length - 1;
+            const reverseStartIndex = totalLinks - reversedLinksCount;
+
+            const arrow = reversedLinksCount > 0 && count >= reverseStartIndex
+                ? createReverseArrow()
+                : createArrow();
+            
             listContainer.appendChild(arrow);
         }
 
@@ -621,6 +715,18 @@ function createArrow() {
             stroke="currentColor"
             stroke-width="2"
         />
+    `;
+
+    return arrow;
+}
+
+function createReverseArrow() {
+    const arrow = createArrow();
+    
+    arrow.innerHTML = `
+        <g transform="rotate(180 30 10)">
+            ${arrow.innerHTML}
+        </g>
     `;
 
     return arrow;

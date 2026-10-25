@@ -73,10 +73,14 @@ class DoublyLinkedList {
         }
     }
 
-    search(value) {
+    search(value, onVisit = null) {
         let current = this.head;
 
         while (current !== null) {
+            if (onVisit !== null) {
+                onVisit(current);
+            }
+
             if (current.value === value) {
                 return current;
             }
@@ -166,6 +170,11 @@ runOperationButton.addEventListener("click", runOperation);
 const insertDelay = 500;
 let insertTimeout = null;
 
+let searchSteps = [];
+let currentSearchStep = 0;
+let searchTimeout = null;
+const searchDelay = 500;
+
 function createDoubleArrow() {
     const arrow = document.createElementNS(
         "http://www.w3.org/2000/svg",
@@ -243,6 +252,12 @@ function drawList(highlightedNode = null, highlightType = "compare") {
             if (highlightType === "insert") {
                 nodeElement.classList.add("list-insert");
             }
+            else if (highlightType === "found") {
+                nodeElement.classList.add("list-found");
+            }
+            else if (highlightType === "compare") {
+                nodeElement.classList.add("list-search");
+            }
         }
 
         const label = document.createElement("div");
@@ -317,6 +332,67 @@ function runOperation() {
             runOperationButton.disabled = false;
         }, insertDelay);
     }
+    else if (operation === "search") {
+        if (operationInput.value === "") {
+            operationStatus.textContent = "Please enter a value.";
+
+            return;
+        }
+
+        const value = Number(operationInput.value);
+
+        runOperationButton.disabled = true;
+
+        prepareSearch(value);
+        playSearchStep();
+    }
+}
+
+function prepareSearch(value) {
+    searchSteps = [];
+    currentSearchStep = 0;
+
+    const result = list.search(value, (node) => {
+        searchSteps.push({
+            type: "compare",
+            node: node
+        });
+    });
+
+    searchSteps.push({
+        type: result !== null ? "found" : "not-found",
+        node: result
+    });
+}
+
+function playSearchStep() {
+    if (currentSearchStep >= searchSteps.length) {
+        searchTimeout = null;
+        runOperationButton.disabled = false;
+
+        return;
+    }
+
+    const step = searchSteps[currentSearchStep];
+
+    if (step.type === "compare") {
+        drawList(step.node, "compare");
+        operationStatus.textContent =
+            `Checking node containing ${step.node.value}.`;
+    }
+    else if (step.type === "found") {
+        drawList(step.node, "found");
+        operationStatus.textContent =
+            `Found ${step.node.value}.`;
+    }
+    else {
+        drawList();
+        operationStatus.textContent = "Value not found.";
+    }
+
+    currentSearchStep++;
+
+    searchTimeout = setTimeout(playSearchStep, searchDelay);
 }
 
 const list = new DoublyLinkedList();

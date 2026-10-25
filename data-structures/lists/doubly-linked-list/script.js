@@ -175,6 +175,11 @@ let currentSearchStep = 0;
 let searchTimeout = null;
 const searchDelay = 500;
 
+let deleteSteps = [];
+let currentDeleteStep = 0;
+let deleteTimeout = null;
+const deleteDelay = 500;
+
 function createDoubleArrow() {
     const arrow = document.createElementNS(
         "http://www.w3.org/2000/svg",
@@ -257,6 +262,9 @@ function drawList(highlightedNode = null, highlightType = "compare") {
             }
             else if (highlightType === "compare") {
                 nodeElement.classList.add("list-search");
+            }
+            else if (highlightType === "delete") {
+                nodeElement.classList.add("list-delete");
             }
         }
 
@@ -346,6 +354,20 @@ function runOperation() {
         prepareSearch(value);
         playSearchStep();
     }
+    else if (operation === "delete") {
+        if (operationInput.value === "") {
+            operationStatus.textContent = "Please enter a value.";
+
+            return;
+        }
+
+        const value = Number(operationInput.value);
+
+        runOperationButton.disabled = true;
+
+        prepareDelete(value);
+        playDeleteStep(value);
+    }
 }
 
 function prepareSearch(value) {
@@ -393,6 +415,91 @@ function playSearchStep() {
     currentSearchStep++;
 
     searchTimeout = setTimeout(playSearchStep, searchDelay);
+}
+
+function prepareDelete(value) {
+    deleteSteps = [];
+    currentDeleteStep = 0;
+
+    let current = list.head;
+
+    while (current !== null) {
+        deleteSteps.push({
+            type: "compare",
+            node: current
+        });
+
+        if (current.value === value) {
+            deleteSteps.push({
+                type: "delete",
+                node: current
+            });
+
+            return;
+        }
+
+        current = current.next;
+    }
+
+    deleteSteps.push({
+        type: "not-found",
+        node: null
+    });
+}
+
+function playDeleteStep(value) {
+    if (currentDeleteStep >= deleteSteps. length) {
+        deleteTimeout = null;
+        runOperationButton.disabled = false;
+
+        return;
+    }
+
+    const step = deleteSteps[currentDeleteStep];
+
+    if (step.type === "compare") {
+        drawList(step.node, "compare");
+
+        operationStatus.textContent =
+            `Checking node containing ${step.node.value}.`;
+    }
+    else if (step.type === "delete") {
+        drawList(step.node, "delete");
+
+        operationStatus.textContent =
+            `Deleting node containing ${step.node.value}.`;
+
+        deleteTimeout = setTimeout(() => {
+            list.delete(value);
+            drawList();
+
+            operationStatus.textContent =
+                `Deleted ${value} from the list.`;
+            
+                deleteTimeout = null;
+                runOperationButton.disabled = false;
+        }, deleteDelay);
+
+        return;
+    }
+    else {
+        drawList();
+        operationStatus.textContent =
+            `${value} was not found in the list.`;
+    }
+
+    currentDeleteStep++;
+
+    if (currentDeleteStep < deleteSteps.length) {
+        deleteTimeout = setTimeout(
+            () => playDeleteStep(value),
+            deleteDelay
+        );
+    }
+    else {
+        deleteTimeout = null;
+        runOperationButton.disabled = false;
+    }
 }
 
 const list = new DoublyLinkedList();

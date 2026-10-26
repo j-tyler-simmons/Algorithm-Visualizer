@@ -180,6 +180,11 @@ let currentDeleteStep = 0;
 let deleteTimeout = null;
 const deleteDelay = 500;
 
+let insertInOrderSteps = [];
+let currentInsertInOrderStep = 0;
+let insertInOrderTimeout = null;
+const insertInOrderDelay = 500;
+
 function createDoubleArrow() {
     const arrow = document.createElementNS(
         "http://www.w3.org/2000/svg",
@@ -368,6 +373,20 @@ function runOperation() {
         prepareDelete(value);
         playDeleteStep(value);
     }
+    else if (operation === "insert-in-order") {
+        if (operationInput.value === "") {
+            operationStatus.textContent = "Please enter a value.";
+
+            return;
+        }
+
+        const value = Number(operationInput.value);
+
+        runOperationButton.disabled = true;
+
+        prepareInsertInOrder(value);
+        playInsertInOrderStep();
+    }
 }
 
 function prepareSearch(value) {
@@ -500,6 +519,72 @@ function playDeleteStep(value) {
         deleteTimeout = null;
         runOperationButton.disabled = false;
     }
+}
+
+function prepareInsertInOrder(value) {
+    insertInOrderSteps = [];
+    currentInsertInOrderStep = 0;
+
+    let current = list.head;
+
+    while (current !== null && current.value < value) {
+        insertInOrderSteps.push({
+            type: "compare",
+            node: current
+        });
+
+        current = current.next;
+    }
+
+    insertInOrderSteps.push({
+        type: "insert",
+        value: value
+    });
+}
+
+function playInsertInOrderStep() {
+    if (currentInsertInOrderStep >= insertInOrderSteps.length) {
+        insertInOrderTimeout = null;
+        runOperationButton.disabled = false;
+
+        return;
+    }
+
+    const step = insertInOrderSteps[currentInsertInOrderStep];
+
+    if (step.type === "compare") {
+        drawList(step.node, "compare");
+
+        operationStatus.textContent =
+            `Checking node containing ${step.node.value}.`;
+    }
+    else if (step.type === "insert") {
+        const newNode = list.insertInOrder(step.value);
+
+        drawList(newNode, "insert");
+
+        operationStatus.textContent =
+            `Inserting ${step.value} in sorted order.`;
+        
+        insertInOrderTimeout = setTimeout(() => {
+            drawList();
+
+            operationStatus.textContent =
+                `Inserted ${step.value} in sorted order.`;
+            
+            insertInOrderTimeout = null;
+            runOperationButton.disabled = false;
+        }, insertInOrderDelay);
+
+        return;
+    }
+
+    currentInsertInOrderStep++;
+    
+    insertInOrderTimeout = setTimeout(
+        playInsertInOrderStep,
+        insertInOrderDelay
+    );
 }
 
 const list = new DoublyLinkedList();
